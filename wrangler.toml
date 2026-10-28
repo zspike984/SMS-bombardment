@@ -1,12 +1,22 @@
-# Cloudflare Pages 项目配置
-# 部署：npx wrangler pages deploy . --project-name sms-bombing-tool --branch main
+# ─────────────────────────────────────────────────────────────
+# 部署方式 A（当前默认）：Cloudflare Workers + Static Assets
+#   面板 Deploy command: npx wrangler deploy
+#   入口 index.js 已实现 /proxy 代理 + 静态资源回退
+# ─────────────────────────────────────────────────────────────
 name = "sms-bombing-tool"
+main = "index.js"
 compatibility_date = "2024-11-01"
-pages_build_output_dir = "."
 
-# ── 若改用 Workers + Static Assets 方式部署，注释掉上面一行，改用：──
-# main = "index.js"
-# [assets]
-# directory = "."
-# binding = "ASSETS"
-# run_worker_first = true      # 关键：让 / 和 /proxy 先经过 worker，否则 POST 直接 405
+[assets]
+directory = "."
+binding = "ASSETS"
+run_worker_first = true   # 关键：/ 与 /proxy 必须先经过 worker，否则 POST 直接 405
+
+# ─────────────────────────────────────────────────────────────
+# 部署方式 B：Cloudflare Pages（functions/ 目录自动编译）
+# 直接把上面整段换成下面两行，并把面板 Deploy command 改为：
+#   npx wrangler pages deploy .
+# ─────────────────────────────────────────────────────────────
+# name = "sms-bombing-tool"
+# compatibility_date = "2024-11-01"
+# pages_build_output_dir = "."

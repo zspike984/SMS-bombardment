@@ -48,6 +48,21 @@
 无需额外配置 proxy 或 Workers，**Cloudflare Pages 会自动处理 `functions/` 目录下
 的代理函数**。
 
+### ⚠️ 先确认部署方式是 Workers 还是 Pages
+
+| 面板里的 Deploy command | 项目类型 | 生效的代理代码 | wrangler.toml 需要 |
+| --- | --- | --- | --- |
+| `npx wrangler deploy` | Workers + Static Assets | `index.js` | `main` + `[assets]` + `run_worker_first = true`（仓库默认） |
+| `npx wrangler pages deploy .` | Pages | `functions/[[path]].js` | 只留 `pages_build_output_dir = "."` |
+
+仓库默认按 **Workers** 配置，因为构建日志里的命令是 `npx wrangler deploy`。如果你的项目是
+Pages 类型，把 `wrangler.toml` 换成文件末尾注释里的那三行，并把 Deploy command 改成
+`npx wrangler pages deploy .`。
+
+> ❌ `Missing entry-point to Worker script or to assets directory`
+> 原因：`wrangler.toml` 里只有 `pages_build_output_dir`（Pages 专用字段），而 `wrangler deploy`
+> 只认 `main` 或 `[assets]`，于是直接失败、构建环境白跑 5 分钟。
+
 ### 第四步：部署后自检（必做）
 
 ```bash
