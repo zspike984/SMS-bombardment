@@ -29,3 +29,6 @@ yarn-error.log*
 
 # Deployment
 windsurf_deployment.yaml
+
+# Wrangler 本地构建缓存（勿提交，含旧构建产物）
+.wrangler/

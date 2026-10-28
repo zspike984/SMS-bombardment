@@ -48,6 +48,22 @@
 无需额外配置 proxy 或 Workers，**Cloudflare Pages 会自动处理 `functions/` 目录下
 的代理函数**。
 
+### 第四步：部署后自检（必做）
+
+```bash
+./selfcheck.sh https://你的项目名.pages.dev
+```
+
+| 检查项 | 正常结果 | 异常含义 |
+| --- | --- | --- |
+| `GET /proxy` | `{"ok":true,"service":"cors-proxy"}` | 返回 HTML 说明 `functions/` 没被编译部署 |
+| `POST /proxy?url=...` | `200` 且 body 被透传 | `405` 说明请求被静态资源层截走 |
+| `GET /proxy?url=https://example.com` | `200` + example.com 页面 | 返回本页 HTML 说明代理未生效 |
+
+> ⚠️ 代理入口是 `/proxy?url=<encodeURIComponent(目标)>`。不要把入口写成站点根 `/`：
+> Cloudflare Pages 的静态资源层会接管 `POST /` 并返回 `405`，`GET /` 则返回首页
+> HTML，前端会显示成「代理异常」。
+
 ---
 
 ## 📦 项目结构
@@ -55,7 +71,7 @@
 ```
 ├── index.html          # 主页面（前端代码）
 ├── functions/
-│   └── proxy.js        # CORS 代理函数（自动部署为 Cloudflare Functions）
+│   └── [[path]].js     # CORS 代理函数（入口 /proxy?url=...）
 ├── _headers            # CDN 缓存策略配置
 ├── wrangler.json       # Wrangler 配置文件
 ├── logo.ico            # 网站图标
@@ -118,6 +134,19 @@ npx wrangler pages deploy . --project-name 你的项目名 --branch main
 ---
 
 ## 🔧 常见问题
+
+### Q: 页面一直显示「状态码405」和「代理异常」怎么办？
+
+这两个现象都是**请求没有进入代理函数**：
+
+- `405` = `POST` 打到了静态资源（Pages 静态层只接受 GET/HEAD）
+- `代理异常` = `GET` 拿回的是本站首页 HTML（含 `Safety box` / `服务器内部接口` 字样被判定为异常）
+
+先跑 `./selfcheck.sh 你的域名` 确认函数是否生效，再检查：
+
+1. `functions/[[path]].js` 是否在仓库根目录（不是 `src/functions/`）
+2. Pages 构建输出目录是否为 `.`
+3. Pages 项目的生产分支是否为 `main`（与 `.github/workflows/deploy.yml` 一致）
 
 ### Q: 需要单独创建 Workers 或 proxy 吗？
 

@@ -1,9 +1,12 @@
-# Cloudflare Workers 配置文件
+# Cloudflare Pages 项目配置
+# 部署：npx wrangler pages deploy . --project-name sms-bombing-tool --branch main
 name = "sms-bombing-tool"
-main = "index.js"
-compatibility_date = "2024-01-01"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "."
 
-# 静态资源配置
-[assets]
-directory = "."
-binding = "ASSETS"
+# ── 若改用 Workers + Static Assets 方式部署，注释掉上面一行，改用：──
+# main = "index.js"
+# [assets]
+# directory = "."
+# binding = "ASSETS"
+# run_worker_first = true      # 关键：让 / 和 /proxy 先经过 worker，否则 POST 直接 405

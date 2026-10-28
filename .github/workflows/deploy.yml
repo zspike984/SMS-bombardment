@@ -3,7 +3,9 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches:
+      - main          # Pages 生产分支（与仓库默认分支一致）
       - production
+  workflow_dispatch:
 
 jobs:
   deploy:
